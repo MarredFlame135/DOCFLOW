@@ -172,13 +172,14 @@
             <div class="user-card">
                 <span class="username" title="{{ current_user.username }}">👤 {{ current_user.username }}</span>
                 Plan: 
-                {% if current_user.subscription_tier == 'free' %}
-                    <span class="badge">Gratis</span>
+                {% if current_user.es_pro() %}
+                    <span class="badge pro">PRO</span>
                 {% else %}
-                    <span class="badge pro">{{ current_user.subscription_tier }}</span>
+                    <span class="badge">Gratis</span>
                 {% endif %}
             </div>
-          <div class="menu-links">
+            
+            <div class="menu-links">
                 <a href="/dashboard" class="{% if request.path == '/dashboard' %}active{% endif %}"><i class="fas fa-chart-line"></i> Dashboard</a>
                 <a href="/extraer_ui" class="{% if request.path == '/extraer_ui' %}active{% endif %}"><i class="fas fa-file-pdf"></i> 1. Extractor</a>
                 <a href="/comparar_ui" class="{% if request.path == '/comparar_ui' %}active{% endif %}"><i class="fas fa-sync-alt"></i> 2. Complementador</a>
@@ -189,8 +190,6 @@
                 {% if current_user.email == 'admin@docuflow.com' %}
                     <a href="/admin/promover" class="{% if request.path == '/admin/promover' %}active{% endif %}" style="color: #f1c40f;"><i class="fas fa-user-shield"></i> Panel Admin</a>
                 {% endif %}
-            </div>    
-            
             </div>
 
             <a href="/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>

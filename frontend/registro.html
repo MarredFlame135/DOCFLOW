@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #eafaf1; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 400px; }
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 440px; }
         h2 { color: #27ae60; text-align: center; margin-bottom: 25px; }
         .input-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #34495e; }
@@ -14,14 +14,47 @@
         input:focus { border-color: #27ae60; outline: none; }
         .btn { background: #27ae60; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.3s; }
         .btn:hover { background: #1e8449; transform: scale(1.02); }
-        .footer-text { text-align: center; margin-top: 20px; color: #7f8c8d; font-size: 0.9rem; }
+        .footer-text { text-align: center; margin-top: 25px; color: #7f8c8d; font-size: 0.9rem; }
         .footer-text a { color: #27ae60; text-decoration: none; font-weight: bold; }
         
-        /* Registro Social */
-        .social-container { display: flex; gap: 10px; margin-top: 15px; }
-        .social-btn { display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #ddd; border-radius: 8px; padding: 10px 15px; color: #555; text-decoration: none; font-weight: bold; font-size: 0.9rem; flex: 1; background: white; transition: 0.3s; }
-        .social-btn:hover { background: #f8f9fa; transform: scale(1.02); }
-        .divider { display: flex; align-items: center; justify-content: center; margin: 20px 0; color: #7f8c8d; font-size: 0.85rem; }
+        /* Botones de Registro Social Horizontales (Estilo Imagen de Referencia) */
+        .social-container { display: flex; gap: 10px; justify-content: space-between; margin-top: 15px; }
+        .social-btn { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            border-radius: 8px; 
+            padding: 10px 15px; 
+            font-weight: 600; 
+            font-size: 0.95rem; 
+            flex: 1; 
+            text-decoration: none; 
+            transition: 0.2s ease;
+            box-sizing: border-box;
+        }
+        .social-btn.fb {
+            background-color: #3b5998;
+            color: white;
+            border: none;
+        }
+        .social-btn.fb:hover { background-color: #2d4373; transform: translateY(-2px); }
+        
+        .social-btn.gg {
+            background-color: white;
+            color: #2c3e50;
+            border: 1px solid #ea4335;
+        }
+        .social-btn.gg:hover { background-color: #fff5f5; transform: translateY(-2px); }
+        
+        .social-btn.sso {
+            background-color: white;
+            color: #2c3e50;
+            border: 1px solid #7f8c8d;
+        }
+        .social-btn.sso:hover { background-color: #f8f9fa; transform: translateY(-2px); }
+
+        .divider { display: flex; align-items: center; justify-content: center; margin: 25px 0 15px 0; color: #7f8c8d; font-size: 0.85rem; }
         .divider span { flex: 1; height: 1px; background: #ddd; }
         .divider p { margin: 0 10px; }
 
@@ -63,9 +96,17 @@
             <span></span><p>O regístrate con</p><span></span>
         </div>
 
+        <!-- BOTONES SOCIALES IDÉNTICOS A LA REFERENCIA -->
         <div class="social-container">
-            <a href="#" class="social-btn"><i class="fab fa-google" style="color: #ea4335;"></i> Google</a>
-            <a href="#" class="social-btn"><i class="fab fa-apple" style="color: #000;"></i> Apple</a>
+            <a href="#" onclick="alert('🔑 Registro social: Esta funcionalidad requiere de un certificado de seguridad SSL y dominio HTTPS verificado. Estará disponible de forma nativa en tu servidor de producción.'); return false;" class="social-btn fb">
+                <i class="fab fa-facebook-f"></i> Facebook
+            </a>
+            <a href="#" onclick="alert('🔑 Registro social: Esta funcionalidad requiere de un certificado de seguridad SSL y dominio HTTPS verificado. Estará disponible de forma nativa en tu servidor de producción.'); return false;" class="social-btn gg">
+                <i class="fab fa-google"></i> Google
+            </a>
+            <a href="#" onclick="alert('🔑 Registro social: Esta funcionalidad requiere de un certificado de seguridad SSL y dominio HTTPS verificado. Estará disponible de forma nativa en tu servidor de producción.'); return false;" class="social-btn sso">
+                <i class="fas fa-key"></i> SSO
+            </a>
         </div>
 
         <p class="footer-text">¿Ya tienes una cuenta? <a href="/login">Inicia sesión</a></p>
