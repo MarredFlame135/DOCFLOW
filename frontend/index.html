@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocFlow Pro | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --red: #e74c3c; --blue: #3498db; --dark: #2d3436; --bg: #f8f9fa; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--dark); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        header { text-align: center; padding: 60px 20px; }
+        .logo { font-size: 2.8rem; font-weight: 600; color: var(--red); margin-bottom: 10px; }
+        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; max-width: 900px; width: 90%; }
+        .tool-card { background: white; border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); transition: 0.3s; text-decoration: none; color: inherit; border-top: 6px solid transparent; }
+        .tool-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .step-1 { border-top-color: var(--red); }
+        .step-2 { border-top-color: var(--blue); }
+        .icon { font-size: 3.5rem; margin-bottom: 20px; }
+        .step-1 .icon { color: var(--red); }
+        .step-2 .icon { color: var(--blue); }
+        h2 { margin-bottom: 15px; font-size: 1.5rem; }
+        p { color: #636e72; line-height: 1.6; margin-bottom: 25px; }
+        .btn-open { padding: 12px 25px; border-radius: 10px; font-weight: 600; transition: 0.3s; }
+        .step-1 .btn-open { background: #feebeb; color: var(--red); }
+        .step-2 .btn-open { background: #ebf5fb; color: var(--blue); }
+        footer { margin-top: auto; padding: 30px; color: #b2bec3; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><i class="fas fa-bolt"></i> DocFlow Pro</div>
+        <p>Herramienta de Automatización para Certificados y Bases de Datos</p>
+    </header>
+
+    <div class="container">
+        <!-- PASO 1 -->
+        <a href="/extraer_ui" class="tool-card step-1">
+            <div class="icon"><i class="fas fa-file-pdf"></i></div>
+            <h2>1. Extractor PDF</h2>
+            <p>Convierte certificados PDF en una tabla de Excel con Nombre, Curso y Fecha automáticamente.</p>
+            <span class="btn-open">Abrir Extractor</span>
+        </a>
+
+        <!-- PASO 2 -->
+        <a href="/comparar_ui" class="tool-card step-2">
+            <div class="icon"><i class="fas fa-sync-alt"></i></div>
+            <h2>2. Complementador</h2>
+            <p>Vincula el Excel extraído con la Base de Datos Maestra para llenar Sexo, Municipio, Estatus e Instructor.</p>
+            <span class="btn-open">Iniciar Cruce</span>
+        </a>
+    </div>
+    <!-- Agrega esta tarjeta dentro del <div class="container"> en index.html -->
+<a href="/listar_ui" class="tool-card step-3" style="border-top-color: #9b59b6;">
+    <div class="icon" style="color: #9b59b6;"><i class="fas fa-list-ol"></i></div>
+    <h2>3. Inventor de Archivos</h2>
+    <p>Genera una lista rápida en Excel con los nombres de todos los PDFs subidos para control interno.</p>
+    <span class="btn-open" style="background: #f4ecf7; color: #9b59b6;">Listar Archivos</span>
+</a>
+
+    <footer>© 2026 DocFlow - Eficiencia para ICATEP - BDM BY DANTE MEDINA SOLUCIONES DIGITALES </footer>
+</body>
+</html>
