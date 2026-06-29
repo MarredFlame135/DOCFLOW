@@ -4,11 +4,13 @@ import pandas as pd
 import traceback
 import time
 import re
-from flask import Flask, render_template, request, send_file, redirect, url_for, flash
+import uuid
+import stripe  # SDK de Stripe
+from datetime import datetime, timedelta  # Importación corregida para el registro temporal de tokens y planes
+from flask import Flask, render_template, request, send_file, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-# Cerca de la línea 6, actualiza la importación de datetime:
-from datetime import datetime, timedelta
+
 # --- CONFIGURACIÓN DE RUTAS ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
@@ -35,8 +37,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Inicializar Base de Datos y Flask-Login
-from models import db, User
+from models import db, User, UserSession
 db.init_app(app)
+
+# --- CONFIGURACIÓN DE STRIPE ---
+stripe.api_key = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_tu_clave_secreta_aqui')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'whsec_tu_webhook_secret_aqui')
+
+# Variables con los Price IDs de tus planes creados en el Dashboard de Stripe
+STRIPE_PRICE_INTERMEDIO = os.environ.get('STRIPE_PRICE_INTERMEDIO', 'price_1X_ejemplo_intermedio')
+STRIPE_PRICE_PRO = os.environ.get('STRIPE_PRICE_PRO', 'price_1Y_ejemplo_pro')
 
 login_manager = LoginManager()
 login_manager.login_view = 'login'
@@ -69,7 +79,7 @@ with app.app_context():
             username="admin",
             email="admin@docuflow.com",
             password_hash=hashed_pw,
-            subscription_tier="pro"
+            subscription_tier="pro"  # Cuenta de administrador con plan PRO ilimitado
         )
         db.session.add(admin)
         db.session.commit()
@@ -102,11 +112,33 @@ def verificar_limpieza_temporal():
         limpiar_archivos_antiguos(max_minutos=15)
         ULTIMA_LIMPIEZA = ahora
 
+# --- VERIFICACIÓN DE SESIONES ÚNICAS SIMULTÁNEAS ---
+@app.before_request
+def verificar_sesion_activa():
+    """Valida que la sesión actual siga activa en la base de datos."""
+    # Permitir acceso al webhook de Stripe sin requerir login o verificación de sesión de usuario
+    if request.endpoint == 'stripe_webhook':
+        return
+
+    if request.endpoint in ['static', 'logout', 'login', 'registro', 'index', 'planes_ui']:
+        return
+        
+    if current_user.is_authenticated:
+        token_actual = session.get('session_token')
+        sesion_valida = UserSession.query.filter_by(user_id=current_user.id, session_token=token_actual).first()
+        
+        if not sesion_valida:
+            logout_user()
+            session.pop('session_token', None)
+            flash('Tu sesión fue cerrada porque iniciaste sesión en otro dispositivo o tu plan no permite más conexiones simultáneas.', 'danger')
+            return redirect(url_for('login'))
+
 # --- RUTAS DE AUTENTICACIÓN ---
+
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('index'))
         
     if request.method == 'POST':
         username = request.form.get('username')
@@ -125,21 +157,21 @@ def registro():
             
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         
-        # --- OFERTA DE LANZAMIENTO: 1 MES PRO GRATIS ---
+        # --- OFERTA DE LANZAMIENTO: 1 MES GRATIS DE PLAN INTERMEDIO ($249) ---
         un_mes_futuro = datetime.utcnow() + timedelta(days=30)
         
         nuevo_usuario = User(
             username=username,
             email=email,
             password_hash=hashed_password,
-            subscription_tier='pro',  # Comienza como PRO de inmediato
-            subscription_end_date=un_mes_futuro  # Expira en 30 días
+            subscription_tier='intermedio',  # Rango intermedio de prueba gratis
+            subscription_end_date=un_mes_futuro
         )
         
         db.session.add(nuevo_usuario)
         db.session.commit()
         
-        flash('¡Cuenta creada con éxito! Se ha activado tu mes de prueba PRO gratuito de 30 días.', 'success')
+        flash('¡Cuenta creada con éxito! Se ha activado tu mes de prueba de PLAN INTERMEDIO gratuito.', 'success')
         return redirect(url_for('login'))
         
     return render_template('registro.html')
@@ -156,6 +188,27 @@ def login():
         usuario = User.query.filter_by(email=email).first()
         if usuario and check_password_hash(usuario.password_hash, password):
             login_user(usuario)
+            
+            # Generar identificador de sesión único
+            token_sesion = str(uuid.uuid4())
+            session['session_token'] = token_sesion
+            
+            # Guardar la sesión en la base de datos
+            nueva_sesion = UserSession(user_id=usuario.id, session_token=token_sesion)
+            db.session.add(nueva_sesion)
+            db.session.commit()
+            
+            # Controlar sesiones concurrentes según su plan
+            limites = usuario.get_plan_limits()
+            max_sesiones = limites['max_sessions']
+            
+            sesiones_activas = UserSession.query.filter_by(user_id=usuario.id).order_by(UserSession.created_at.asc()).all()
+            if len(sesiones_activas) > max_sesiones:
+                exceso = len(sesiones_activas) - max_sesiones
+                for i in range(exceso):
+                    db.session.delete(sesiones_activas[i])
+                db.session.commit()
+            
             flash('Sesión iniciada.', 'success')
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('dashboard'))
@@ -167,7 +220,13 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
+    token_actual = session.get('session_token')
+    if token_actual:
+        UserSession.query.filter_by(session_token=token_actual).delete()
+        db.session.commit()
+        
     logout_user()
+    session.pop('session_token', None)
     flash('Sesión cerrada.', 'info')
     return redirect(url_for('login'))
 
@@ -175,13 +234,11 @@ def logout():
 
 @app.route('/')
 def index():
-    """Lobby / Landing Page Pública (No requiere inicio de sesión)"""
     return render_template('index.html')
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    """Panel de control privado con las herramientas (Requiere inicio de sesión)"""
     return render_template('dashboard.html')
 
 @app.route('/extraer_ui')
@@ -203,21 +260,189 @@ def listar_ui():
 def planes_ui():
     return render_template('planes.html')
 
-# --- ACCIÓN DE SIMULACIÓN DE COMPRA (PRO) ---
+# --- ACCIONES DE COMPRA STRIPE (REEMPLAZA SIMULADOR ANTERIOR) ---
 
-@app.route('/upgrade_pro')
+@app.route('/upgrade/<plan>')
 @login_required
-def upgrade_pro():
-    """Simulación de pago de Stripe. Actualiza el usuario a plan PRO."""
+def upgrade_plan(plan):
+    """Genera una sesión de pago real de Stripe Billing y redirige al usuario."""
+    if plan not in ['intermedio', 'pro']:
+        flash('Plan de pago no válido.', 'danger')
+        return redirect(url_for('planes_ui'))
+        
+    # Mapeo al Price ID correspondiente en base al entorno
+    price_id = STRIPE_PRICE_INTERMEDIO if plan == 'intermedio' else STRIPE_PRICE_PRO
+    
+    # Validación de seguridad por si no se configuraron las llaves
+    if not stripe.api_key or stripe.api_key == 'sk_test_tu_clave_secreta_aqui' or price_id.startswith('price_1X_ejemplo'):
+        flash('La pasarela de pago se encuentra en mantenimiento temporal. Intenta más tarde.', 'danger')
+        return redirect(url_for('planes_ui'))
+
     try:
         user = User.query.get(current_user.id)
-        user.subscription_tier = 'pro'
-        db.session.commit()
-        flash('🎉 ¡Suscripción actualizada con éxito! Ahora eres un usuario PRO de DocFlow.', 'success')
-        return redirect(url_for('planes_ui'))
+        
+        # 1. Crear o asociar Cliente en Stripe
+        if not user.stripe_customer_id:
+            customer = stripe.Customer.create(
+                email=user.email,
+                name=user.username,
+                metadata={"user_id": user.id}
+            )
+            user.stripe_customer_id = customer.id
+            db.session.commit()
+            
+        # 2. Generar el Checkout Session para suscripciones recurrentes
+        checkout_session = stripe.checkout.Session.create(
+            customer=user.stripe_customer_id,
+            payment_method_types=['card'],
+            line_items=[{
+                'price': price_id,
+                'quantity': 1,
+            }],
+            mode='subscription',
+            success_url=url_for('stripe_success', _external=True),
+            cancel_url=url_for('planes_ui', _external=True),
+            metadata={
+                'user_id': user.id,
+                'plan': plan
+            }
+        )
+        return redirect(checkout_session.url, code=303)
+        
     except Exception as e:
-        flash('Ocurrió un error al procesar el pago ficticio.', 'danger')
+        print(f"❌ Error al crear Stripe Session: {e}")
+        flash('Ocurrió un error al procesar el enlace de compra. Contacte al administrador.', 'danger')
         return redirect(url_for('planes_ui'))
+
+@app.route('/stripe-success')
+@login_required
+def stripe_success():
+    flash('🎉 ¡Pago procesado con éxito! Tu suscripción se activará en tu panel de forma automática en breve.', 'success')
+    return redirect(url_for('dashboard'))
+
+# --- ENDPOINT DEL WEBHOOK DE STRIPE ---
+
+@app.route('/stripe/webhook', methods=['POST'])
+def stripe_webhook():
+    """Recibe y valida las notificaciones asíncronas de cobros de Stripe."""
+    payload = request.data
+    sig_header = request.headers.get('STRIPE_SIGNATURE') or request.headers.get('Stripe-Signature')
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        # Payload corrupto
+        return 'Invalid payload', 400
+    except stripe.error.SignatureVerificationError as e:
+        # Firma inválida o sospecha de spoofing
+        return 'Invalid signature', 400
+
+    event_type = event['type']
+    data_object = event['data']['object']
+
+    # EVENTO 1: Checkout completado con éxito
+    if event_type == 'checkout.session.completed':
+        metadata = data_object.get('metadata', {})
+        user_id = metadata.get('user_id')
+        plan = metadata.get('plan')
+        stripe_sub_id = data_object.get('subscription')
+        stripe_cust_id = data_object.get('customer')
+
+        if user_id and plan:
+            user = User.query.get(int(user_id))
+            if user:
+                user.subscription_tier = plan
+                user.subscription_active = True
+                user.stripe_subscription_id = stripe_sub_id
+                user.stripe_customer_id = stripe_cust_id
+                # Establecer una fecha provisional amplia (32 días) que se actualiza con la factura
+                user.subscription_end_date = datetime.utcnow() + timedelta(days=32)
+                
+                # Gestión de sesiones concurrentes: reducir el excedente si bajó de nivel
+                limites = user.get_plan_limits()
+                max_sesiones = limites['max_sessions']
+                sesiones_activas = UserSession.query.filter_by(user_id=user.id).order_by(UserSession.created_at.asc()).all()
+                if len(sesiones_activas) > max_sesiones:
+                    exceso = len(sesiones_activas) - max_sesiones
+                    for i in range(exceso):
+                        db.session.delete(sesiones_activas[i])
+                
+                db.session.commit()
+                print(f"✅ Webhook: Plan {plan.upper()} activado con éxito para el Usuario ID: {user_id}")
+
+    # EVENTO 2 & 3: Cambios o actualizaciones en las suscripciones recurrentes (renovación/pago fallido)
+    elif event_type in ['customer.subscription.updated', 'customer.subscription.deleted']:
+        stripe_sub_id = data_object['id']
+        user = User.query.filter_by(stripe_subscription_id=stripe_sub_id).first()
+
+        if user:
+            if event_type == 'customer.subscription.deleted':
+                # Suscripción cancelada de por vida o impago absoluto
+                user.subscription_tier = 'free'
+                user.subscription_active = True
+                user.subscription_end_date = None
+                user.stripe_subscription_id = None
+                db.session.commit()
+                print(f"🛑 Webhook: Suscripción cancelada y revertida a GRATUITA para el Usuario ID: {user.id}")
+            else:
+                # Actualización de ciclo de pago o renovación mensual exitosa
+                status = data_object.get('status')
+                if status in ['active', 'trialing']:
+                    user.subscription_active = True
+                else:
+                    # En mora, suspendida o incompleta
+                    user.subscription_active = False
+                
+                # Leer fecha exacta del fin de periodo asignada por Stripe
+                period_end_timestamp = data_object.get('current_period_end')
+                if period_end_timestamp:
+                    user.subscription_end_date = datetime.fromtimestamp(period_end_timestamp)
+                
+                db.session.commit()
+                print(f"🔄 Webhook: Suscripción actualizada para Usuario ID: {user.id}. Estado actual en Stripe: {status}")
+
+    return 'OK', 200
+
+# --- ACCIÓN DE ADMINISTRACIÓN MANUAL ---
+
+@app.route('/admin/promover', methods=['GET', 'POST'])
+@login_required
+def admin_promover():
+    if current_user.email != 'admin@docuflow.com':
+        flash('Acceso denegado.', 'danger')
+        return redirect(url_for('dashboard'))
+        
+    if request.method == 'POST':
+        email = request.form.get('email')
+        tiempo = request.form.get('tiempo')
+        
+        usuario = User.query.filter_by(email=email).first()
+        if not usuario:
+            flash('Usuario no encontrado.', 'danger')
+            return redirect(url_for('admin_promover'))
+            
+        if tiempo == 'free':
+            usuario.subscription_tier = 'free'
+            usuario.subscription_end_date = None
+            usuario.stripe_subscription_id = None
+        elif tiempo == 'infinite':
+            usuario.subscription_tier = 'pro'
+            usuario.subscription_end_date = None
+            usuario.stripe_subscription_id = None
+        else:
+            meses_otorgados = int(tiempo)
+            usuario.subscription_tier = 'pro'
+            usuario.subscription_active = True
+            usuario.subscription_end_date = datetime.utcnow() + timedelta(days=meses_otorgados * 30)
+            
+        db.session.commit()
+        flash(f'Suscripción del usuario {usuario.username} actualizada.', 'success')
+        return redirect(url_for('admin_promover'))
+        
+    return render_template('admin_promover.html')
 
 # --- LÓGICA DE PROCESAMIENTO ---
 
@@ -230,18 +455,20 @@ def action_extraer():
         pdfs = request.files.getlist('pdfs')
         if not pdfs or pdfs[0].filename == '': return "Error: No hay PDFs."
 
-    
-        
-    # Busca esta sección dentro de /action_extraer en app.py:
         total = len(pdfs)
         
-        # Cambiamos el condicional antiguo por el nuevo método dinámico
-        if not current_user.es_pro() and total > 10:
+        # --- CONTROL DE SUSCRIPCIÓN COMPLETO ---
+        limites = current_user.get_plan_limits()
+        max_pdfs = limites['max_pdfs']
+        
+        # Verificamos si excede el límite del plan asignado
+        if total > max_pdfs:
             return """
-            <h3>Plan Gratuito Superado</h3>
-            <p>El plan gratuito solo permite procesar un límite de 10 certificados PDF por lote.</p>
-            <p><a href='/planes_ui'>Mejora tu plan a Pro aquí para procesar archivos ilimitados.</a></p>
-            """
+            <h3>Límite de Suscripción Superado</h3>
+            <p>Tu plan actual ({plan_name}) solo permite procesar un límite de {max_pdfs} certificados PDF por lote.</p>
+            <p>Estás intentando procesar {total} archivos.</p>
+            <p><a href='/planes_ui'>Mejora tu plan de suscripción aquí.</a></p>
+            """.format(plan_name=limites['name'], max_pdfs=max_pdfs, total=total)
 
         ruta_p = os.path.join(UPLOAD_FOLDER, "temp_plantilla_p1.xlsx")
         plantilla.save(ruta_p)
@@ -293,43 +520,3 @@ def action_listar():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001, threaded=True)
-
-@app.route('/admin/promover', methods=['GET', 'POST'])
-@login_required
-def admin_promover():
-    # Seguridad estricta: Solo el administrador oficial puede entrar aquí
-    if current_user.email != 'admin@docuflow.com':
-        flash('Acceso denegado. No tienes permisos para acceder al Panel Admin.', 'danger')
-        return redirect(url_for('dashboard'))
-        
-    if request.method == 'POST':
-        email = request.form.get('email')
-        tiempo = request.form.get('tiempo')
-        
-        usuario = User.query.filter_by(email=email).first()
-        if not usuario:
-            flash('Usuario no encontrado. Verifica el correo.', 'danger')
-            return redirect(url_for('admin_promover'))
-            
-        if tiempo == 'free':
-            # Degradar a plan gratuito estándar
-            usuario.subscription_tier = 'free'
-            usuario.subscription_end_date = None
-            flash(f'El usuario {usuario.username} ha sido degradado al plan gratuito.', 'info')
-        elif tiempo == 'infinite':
-            # Otorgar acceso permanente de por vida
-            usuario.subscription_tier = 'pro'
-            usuario.subscription_end_date = None
-            flash(f'👑 ¡Otorgado! El usuario {usuario.username} ahora tiene PRO de por vida.', 'success')
-        else:
-            # Otorgar meses específicos (30 días por cada uno)
-            meses_otorgados = int(tiempo)
-            usuario.subscription_tier = 'pro'
-            usuario.subscription_active = True
-            usuario.subscription_end_date = datetime.utcnow() + timedelta(days=meses_otorgados * 30)
-            flash(f'Suscripción PRO del usuario {usuario.username} extendida exitosamente por {meses_otorgados} mes(es).', 'success')
-            
-        db.session.commit()
-        return redirect(url_for('admin_promover'))
-        
-    return render_template('admin_promover.html')
