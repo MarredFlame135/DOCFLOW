@@ -1,28 +1,42 @@
+<!-- frontend/listar.html -->
 {% extends "base.html" %}
-{% block title %}Paso 2 - Complementar Datos{% endblock %}
+{% block title %}Paso 3 - Inventario de PDFs{% endblock %}
 {% block content %}
 <style>
-    .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; width: 100%; margin-top: 20px; }
-    h2 { color: var(--accent-blue); margin-top: 0; }
-    .input-group { margin-bottom: 20px; }
-    label { display: block; margin-bottom: 8px; font-weight: bold; color: #34495e; }
+    .card { 
+        background: white; 
+        padding: 40px; 
+        border-radius: 20px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+        max-width: 500px; 
+        width: 100%; 
+        margin-top: 20px; 
+        text-align: center; 
+    }
+    h2 { color: var(--accent-purple); margin-top: 0; }
+    .btn { 
+        background: var(--accent-purple); 
+        color: white; 
+        border: none; 
+        padding: 15px; 
+        width: 100%; 
+        border-radius: 10px; 
+        cursor: pointer; 
+        font-weight: bold; 
+        margin-top: 20px; 
+        font-size: 1rem; 
+        transition: 0.3s; 
+    }
+    .btn:hover { background: #8e44ad; transform: scale(1.02); }
     input[type="file"] { width: 100%; border: 1px solid #ddd; padding: 10px; border-radius: 5px; box-sizing: border-box; }
-    .btn { background: var(--accent-blue); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.3s; }
-    .btn:hover { background: #2471a3; transform: scale(1.02); }
 </style>
 
 <div class="card">
-    <h2><i class="fas fa-sync-alt"></i> Paso 2: Complementar</h2>
-    <form action="/action_comparar" method="post" enctype="multipart/form-data">
-        <div class="input-group">
-            <label>Excel con Datos Nuevos (Paso 1):</label>
-            <input type="file" name="reciente" required accept=".xlsx">
-        </div>
-        <div class="input-group">
-            <label>Excel Maestro (Base de Datos):</label>
-            <input type="file" name="maestro" required accept=".xlsx">
-        </div>
-        <button type="submit" class="btn">Cruzar y Completar</button>
+    <h2><i class="fas fa-list-ol"></i> Inventario de Archivos</h2>
+    <p style="color: #636e72;">Selecciona los archivos PDF para generar una lista rápida de nombres en un archivo de Excel.</p>
+    <form action="/action_listar" method="post" enctype="multipart/form-data">
+        <input type="file" name="pdfs" multiple required accept=".pdf" style="margin-top: 10px;">
+        <button type="submit" class="btn">Generar Lista de Excel</button>
     </form>
 </div>
 {% endblock %}

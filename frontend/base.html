@@ -178,19 +178,18 @@
                     <span class="badge pro">{{ current_user.subscription_tier }}</span>
                 {% endif %}
             </div>
-            
-            <div class="menu-links">
-                <a href="/" class="{% if request.path == '/' %}active{% endif %}"><i class="fas fa-chart-line"></i> Dashboard</a>
+          <div class="menu-links">
+                <a href="/dashboard" class="{% if request.path == '/dashboard' %}active{% endif %}"><i class="fas fa-chart-line"></i> Dashboard</a>
                 <a href="/extraer_ui" class="{% if request.path == '/extraer_ui' %}active{% endif %}"><i class="fas fa-file-pdf"></i> 1. Extractor</a>
                 <a href="/comparar_ui" class="{% if request.path == '/comparar_ui' %}active{% endif %}"><i class="fas fa-sync-alt"></i> 2. Complementador</a>
                 <a href="/listar_ui" class="{% if request.path == '/listar_ui' %}active{% endif %}"><i class="fas fa-list-ol"></i> 3. Inventor</a>
-                <a href="/planes_ui" class="{% if request.path == '/planes_ui' %}active{% endif %}"><i class="fas fa-tags"></i> Planes de Precios</a>
                 <a href="/planes_ui" class="{% if request.path == '/planes_ui' %}active{% endif %}"><i class="fas fa-tags"></i> Planes de Precios</a>
                 
                 <!-- ENLACE DE ADMINISTRADOR EXCLUSIVO -->
                 {% if current_user.email == 'admin@docuflow.com' %}
                     <a href="/admin/promover" class="{% if request.path == '/admin/promover' %}active{% endif %}" style="color: #f1c40f;"><i class="fas fa-user-shield"></i> Panel Admin</a>
-                {% endif %}              
+                {% endif %}
+            </div>    
             
             </div>
 
