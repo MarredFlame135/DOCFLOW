@@ -1,0 +1,84 @@
+<!-- frontend/dashboard.html -->
+{% extends "base.html" %}
+{% block title %}Dashboard - DocFlow Pro{% endblock %}
+{% block content %}
+<style>
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        max-width: 900px;
+        width: 100%;
+        margin-top: 20px;
+    }
+    .tool-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        transition: 0.3s;
+        text-decoration: none;
+        color: inherit;
+        border-top: 6px solid transparent;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .tool-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+    .step-1 { border-top-color: var(--accent); }
+    .step-2 { border-top-color: var(--accent-blue); }
+    .step-3 { border-top-color: var(--accent-purple); }
+    
+    .icon { font-size: 3.5rem; margin-bottom: 20px; }
+    .step-1 .icon { color: var(--accent); }
+    .step-2 .icon { color: var(--accent-blue); }
+    .step-3 .icon { color: var(--accent-purple); }
+    
+    h2 { margin-bottom: 15px; font-size: 1.5rem; }
+    p { color: #636e72; line-height: 1.6; margin-bottom: 25px; }
+    
+    .btn-open { padding: 12px 25px; border-radius: 10px; font-weight: 600; transition: 0.3s; display: inline-block; }
+    .step-1 .btn-open { background: #feebeb; color: var(--accent); }
+    .step-2 .btn-open { background: #ebf5fb; color: var(--accent-blue); }
+    .step-3 .btn-open { background: #f4ecf7; color: var(--accent-purple); }
+</style>
+
+<h2><i class="fas fa-home"></i> Bienvenido a tu Panel de Automatización</h2>
+<p style="color: #636e72;">Selecciona una herramienta a continuación para comenzar a trabajar.</p>
+
+<div class="dashboard-container">
+    <!-- PASO 1 -->
+    <a href="/extraer_ui" class="tool-card step-1">
+        <div>
+            <div class="icon"><i class="fas fa-file-pdf"></i></div>
+            <h2>1. Extractor PDF</h2>
+            <p>Convierte certificados PDF en una tabla de Excel con Nombre, Curso y Fecha automáticamente.</p>
+        </div>
+        <span class="btn-open">Abrir Extractor</span>
+    </a>
+
+    <!-- PASO 2 -->
+    <a href="/comparar_ui" class="tool-card step-2">
+        <div>
+            <div class="icon"><i class="fas fa-sync-alt"></i></div>
+            <h2>2. Complementador</h2>
+            <p>Vincula el Excel extraído con la Base de Datos Maestra para llenar Sexo, Municipio, Estatus e Instructor.</p>
+        </div>
+        <span class="btn-open">Iniciar Cruce</span>
+    </a>
+
+    <!-- PASO 3 -->
+    <a href="/listar_ui" class="tool-card step-3">
+        <div>
+            <div class="icon"><i class="fas fa-list-ol"></i></div>
+            <h2>3. Inventor de Archivos</h2>
+            <p>Genera una lista rápida en Excel con los nombres de todos los PDFs subidos para control interno.</p>
+        </div>
+        <span class="btn-open">Listar Archivos</span>
+    </a>
+</div>
+{% endblock %}

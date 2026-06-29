@@ -1,0 +1,133 @@
+<!-- frontend/planes.html -->
+{% extends "base.html" %}
+{% block title %}Planes y Precios - DocFlow Pro{% endblock %}
+{% block content %}
+<style>
+    .pricing-container {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+        max-width: 900px;
+        width: 100%;
+        margin-top: 20px;
+    }
+    .price-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px 30px;
+        flex: 1;
+        min-width: 280px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        border-top: 6px solid #95a5a6;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+    }
+    .price-card.pro-tier {
+        border-top-color: var(--accent-green);
+        transform: scale(1.03);
+    }
+    .price-card.pro-tier .popular-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--accent-green);
+        color: white;
+        padding: 5px 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+    .price-card h3 {
+        margin: 0 0 15px 0;
+        font-size: 1.6rem;
+        color: var(--primary);
+    }
+    .price-card .price {
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: var(--primary);
+    }
+    .price-card .price span {
+        font-size: 1rem;
+        color: #7f8c8d;
+        font-weight: normal;
+    }
+    .price-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 30px 0;
+        text-align: left;
+    }
+    .price-card ul li {
+        padding: 10px 0;
+        color: #555;
+        border-bottom: 1px solid #f1f1f1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .price-card ul li i {
+        color: var(--accent-green);
+    }
+    .price-card .pricing-btn {
+        background: var(--primary);
+        color: white;
+        text-decoration: none;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .price-card .pricing-btn:hover {
+        opacity: 0.9;
+    }
+    .price-card.pro-tier .pricing-btn {
+        background: var(--accent-green);
+    }
+</style>
+
+<h2><i class="fas fa-tags"></i> Planes de Suscripción</h2>
+<p style="color: #636e72; margin-bottom: 30px;">Selecciona el plan que mejor se adapte al volumen de procesamiento de tu equipo.</p>
+
+<div class="pricing-container">
+    <!-- PLAN GRATUITO -->
+    <div class="price-card">
+        <div>
+            <h3>Plan Gratuito</h3>
+            <div class="price">$0 <span>/ mes</span></div>
+            <ul>
+                <li><i class="fas fa-check"></i> Máximo 10 PDFs por lote</li>
+                <li><i class="fas fa-check"></i> Extractor de nombres básico</li>
+                <li><i class="fas fa-check"></i> Limpieza estándar de nombres</li>
+                <li><i class="fas fa-times" style="color: var(--accent);"></i> Base de datos maestra ilimitada</li>
+                <li><i class="fas fa-times" style="color: var(--accent);"></i> Soporte dedicado</li>
+            </ul>
+        </div>
+        <a href="/dashboard" class="pricing-btn">Comenzar Gratis</a>
+    </div>
+
+    <!-- PLAN PRO -->
+    <div class="price-card pro-tier">
+        <div class="popular-badge">Recomendado</div>
+        <div>
+            <h3>Plan Pro</h3>
+            <div class="price">$399 <span>/ mes</span></div>
+            <ul>
+                <li><i class="fas fa-check"></i> PDFs ilimitados por lote (1000+)</li>
+                <li><i class="fas fa-check"></i> Normalización extrema de nombres</li>
+                <li><i class="fas fa-check"></i> Vinculación completa con DB Maestra</li>
+                <li><i class="fas fa-check"></i> Generación automatizada de reportes</li>
+                <li><i class="fas fa-check"></i> Soporte técnico preferente</li>
+            </ul>
+        </div>
+        <!-- Vinculado a la simulación de pago /upgrade_pro -->
+        <a href="/upgrade_pro" class="pricing-btn">Mejorar a Pro</a>
+    </div>
+</div>
+{% endblock %}

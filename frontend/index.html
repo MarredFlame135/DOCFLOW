@@ -3,61 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocFlow Pro | Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>DocFlow Pro - Eficiencia para Certificados y Datos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --red: #e74c3c; --blue: #3498db; --dark: #2d3436; --bg: #f8f9fa; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--dark); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        header { text-align: center; padding: 60px 20px; }
-        .logo { font-size: 2.8rem; font-weight: 600; color: var(--red); margin-bottom: 10px; }
-        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; max-width: 900px; width: 90%; }
-        .tool-card { background: white; border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); transition: 0.3s; text-decoration: none; color: inherit; border-top: 6px solid transparent; }
-        .tool-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        .step-1 { border-top-color: var(--red); }
-        .step-2 { border-top-color: var(--blue); }
-        .icon { font-size: 3.5rem; margin-bottom: 20px; }
-        .step-1 .icon { color: var(--red); }
-        .step-2 .icon { color: var(--blue); }
-        h2 { margin-bottom: 15px; font-size: 1.5rem; }
-        p { color: #636e72; line-height: 1.6; margin-bottom: 25px; }
-        .btn-open { padding: 12px 25px; border-radius: 10px; font-weight: 600; transition: 0.3s; }
-        .step-1 .btn-open { background: #feebeb; color: var(--red); }
-        .step-2 .btn-open { background: #ebf5fb; color: var(--blue); }
-        footer { margin-top: auto; padding: 30px; color: #b2bec3; font-size: 0.9rem; }
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --accent-blue: #3498db;
+            --bg-dark: #1e272e;
+            --bg-light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-light);
+            color: #2d3436;
+            overflow-x: hidden;
+        }
+
+        /* ANIMACIONES CSS */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        /* BARRA DE NAVEGACIÓN SUPERIOR */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 8%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+
+        nav .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        nav .nav-links a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+
+        nav .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        nav .btn-nav {
+            background: var(--primary);
+            color: white !important;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: 0.3s ease;
+        }
+
+        nav .btn-nav:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* SECCIÓN HERO (PRINCIPAL) */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 80px 8%;
+            background: linear-gradient(135deg, #2c3e50 0%, #1e272e 100%);
+            color: white;
+            min-height: 60vh;
+            position: relative;
+        }
+
+        .hero-text {
+            max-width: 550px;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin: 0 0 20px 0;
+        }
+
+        .hero-text h1 span {
+            color: var(--accent);
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            color: #d1d8e0;
+            line-height: 1.6;
+            margin-bottom: 35px;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-cta {
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-cta.primary {
+            background: var(--accent);
+            color: white;
+            animation: pulseGlow 2s infinite;
+        }
+
+        .btn-cta.primary:hover {
+            background: #ff4757;
+            transform: scale(1.05);
+        }
+
+        .btn-cta.secondary {
+            border: 2px solid white;
+            color: white;
+        }
+
+        .btn-cta.secondary:hover {
+            background: white;
+            color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .hero-image {
+            max-width: 450px;
+            animation: float 5s ease-in-out infinite, fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .hero-image img {
+            width: 100%;
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.3));
+        }
+
+        /* SECCIÓN DE CARACTERÍSTICAS */
+        .features {
+            padding: 80px 8%;
+            text-align: center;
+        }
+
+        .features h2 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .features-subtitle {
+            color: #7f8c8d;
+            margin-bottom: 50px;
+            font-size: 1.1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: left;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 25px;
+            display: inline-block;
+        }
+
+        .feature-card.f1 .feature-icon { color: var(--accent); }
+        .feature-card.f2 .feature-icon { color: var(--accent-blue); }
+        .feature-card.f3 .feature-icon { color: #9b59b6; }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: #7f8c8d;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        footer {
+            background: var(--bg-dark);
+            color: #a4b0be;
+            padding: 40px 8%;
+            text-align: center;
+            font-size: 0.9rem;
+            border-top: 1px solid #2f3542;
+        }
+
+        @media (max-width: 900px) {
+            .hero { flex-direction: column-reverse; text-align: center; padding: 40px 5%; }
+            .hero-text h1 { font-size: 2.5rem; }
+            .hero-ctas { justify-content: center; }
+            .hero-image { max-width: 280px; margin-bottom: 40px; }
+        }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo"><i class="fas fa-bolt"></i> DocFlow Pro</div>
-        <p>Herramienta de Automatización para Certificados y Bases de Datos</p>
-    </header>
 
-    <div class="container">
-        <!-- PASO 1 -->
-        <a href="/extraer_ui" class="tool-card step-1">
-            <div class="icon"><i class="fas fa-file-pdf"></i></div>
-            <h2>1. Extractor PDF</h2>
-            <p>Convierte certificados PDF en una tabla de Excel con Nombre, Curso y Fecha automáticamente.</p>
-            <span class="btn-open">Abrir Extractor</span>
-        </a>
+    <!-- MENÚ SUPERIOR -->
+    <nav>
+        <a href="/" class="logo"><i class="fas fa-bolt"></i> DocFlow Pro</a>
+        <div class="nav-links">
+            <a href="/planes_ui">Planes y Precios</a>
+            {% if current_user.is_authenticated %}
+                <a href="/dashboard" class="btn-nav">Ir al Dashboard</a>
+            {% else %}
+                <a href="/login">Iniciar Sesión</a>
+                <a href="/registro" class="btn-nav">Crear Cuenta</a>
+            {% endif %}
+        </div>
+    </nav>
 
-        <!-- PASO 2 -->
-        <a href="/comparar_ui" class="tool-card step-2">
-            <div class="icon"><i class="fas fa-sync-alt"></i></div>
-            <h2>2. Complementador</h2>
-            <p>Vincula el Excel extraído con la Base de Datos Maestra para llenar Sexo, Municipio, Estatus e Instructor.</p>
-            <span class="btn-open">Iniciar Cruce</span>
-        </a>
-    </div>
-    <!-- Agrega esta tarjeta dentro del <div class="container"> en index.html -->
-<a href="/listar_ui" class="tool-card step-3" style="border-top-color: #9b59b6;">
-    <div class="icon" style="color: #9b59b6;"><i class="fas fa-list-ol"></i></div>
-    <h2>3. Inventor de Archivos</h2>
-    <p>Genera una lista rápida en Excel con los nombres de todos los PDFs subidos para control interno.</p>
-    <span class="btn-open" style="background: #f4ecf7; color: #9b59b6;">Listar Archivos</span>
-</a>
+    <!-- HÉROE (HERO SECTION) -->
+    <section class="hero">
+        <div class="hero-text">
+            <h1>Sube tus Certificados. <span>Obtén el Reporte.</span></h1>
+            <p>La plataforma inteligente que lee certificados PDF en lote, limpia y normaliza nombres automáticamente y los vincula de forma segura con tu Base de Datos Maestra de ICATEP.</p>
+            <div class="hero-ctas">
+                {% if current_user.is_authenticated %}
+                    <a href="/dashboard" class="btn-cta primary">Comenzar a Trabajar <i class="fas fa-arrow-right"></i></a>
+                {% else %}
+                    <a href="/registro" class="btn-cta primary">Probar Gratis <i class="fas fa-arrow-right"></i></a>
+                    <a href="/planes_ui" class="btn-cta secondary">Ver Planes</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="hero-image">
+            <!-- Icono decorativo flotante que representa el procesamiento rápido de documentos -->
+            <i class="fas fa-file-invoice" style="font-size: 15rem; color: rgba(255, 255, 255, 0.15); filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.5));"></i>
+        </div>
+    </section>
 
-    <footer>© 2026 DocFlow - Eficiencia para ICATEP - BDM BY DANTE MEDINA SOLUCIONES DIGITALES </footer>
+    <!-- CARACTERÍSTICAS -->
+    <section class="features">
+        <h2>Poderosas Herramientas de Automatización</h2>
+        <p class="features-subtitle">Optimiza tus tareas operativas y ahorra horas de trabajo repetitivo en Excel.</p>
+        
+        <div class="features-grid">
+            <!-- TARJETA 1 -->
+            <div class="feature-card f1">
+                <div class="feature-icon"><i class="fas fa-file-pdf"></i></div>
+                <h3>1. Extractor Inteligente</h3>
+                <p>Usa algoritmos OCR y lectura basada en coordenadas para extraer el nombre del alumno, curso y fecha de emisión sin errores.</p>
+            </div>
+
+            <!-- TARJETA 2 -->
+            <div class="feature-card f2">
+                <div class="feature-icon"><i class="fas fa-sync-alt"></i></div>
+                <h3>2. Normalización Extrema</h3>
+                <p>Cruza los datos de salida con tu base maestra. Detecta coincidencias incluso si el orden de los apellidos o los acentos difieren.</p>
+            </div>
+
+            <!-- TARJETA 3 -->
+            <div class="feature-card f3">
+                <div class="feature-icon"><i class="fas fa-list-ol"></i></div>
+                <h3>3. Inventor de Archivos</h3>
+                <p>Genera en segundos listas estructuradas con los nombres de todos los archivos del directorio, optimizando el control interno.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 DocFlow - Solución de Automatización para ICATEP y Centros de Capacitación.</p>
+    </footer>
+
 </body>
 </html>

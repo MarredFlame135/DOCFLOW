@@ -1,0 +1,37 @@
+<!-- frontend/admin_promover.html -->
+{% extends "base.html" %}
+{% block title %}Panel Admin - DocFlow Pro{% endblock %}
+{% block content %}
+<style>
+    .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 500px; width: 100%; margin-top: 20px; }
+    h2 { color: #f1c40f; margin-top: 0; }
+    .input-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; font-weight: bold; color: #34495e; }
+    input[type="email"], select { width: 100%; border: 1px solid #ddd; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+    .btn { background: #f1c40f; color: #2c3e50; border: none; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.3s; }
+    .btn:hover { background: #d4ac0d; transform: scale(1.02); }
+</style>
+
+<div class="card">
+    <h2><i class="fas fa-user-shield"></i> Regalar Acceso PRO</h2>
+    <p style="color: #636e72;">Busca un usuario por su correo electrónico y modifícale su suscripción.</p>
+    
+    <form action="/admin/promover" method="post">
+        <div class="input-group">
+            <label>Correo Electrónico del Usuario:</label>
+            <input type="email" name="email" required placeholder="correo@ejemplo.com">
+        </div>
+        <div class="input-group">
+            <label>Tiempo de suscripción a otorgar:</label>
+            <select name="tiempo" required>
+                <option value="1">1 Mes Gratis (Prueba)</option>
+                <option value="3">3 Meses Gratis</option>
+                <option value="6">6 Meses Gratis</option>
+                <option value="infinite">PRO Ilimitado (De por vida)</option>
+                <option value="free">Degradar a Plan Gratuito</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">Actualizar Suscripción</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>DocFlow Pro - Iniciar Sesión</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 400px; }
+        h2 { color: #2c3e50; text-align: center; margin-bottom: 25px; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #34495e; }
+        input[type="email"], input[type="password"] { width: 100%; border: 1px solid #ddd; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        input:focus { border-color: #3498db; outline: none; }
+        .btn { background: #2c3e50; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background: #1a252f; transform: scale(1.02); }
+        .footer-text { text-align: center; margin-top: 20px; color: #7f8c8d; font-size: 0.9rem; }
+        .footer-text a { color: #3498db; text-decoration: none; font-weight: bold; }
+        
+        /* Botones de Registro Social */
+        .social-container { display: flex; gap: 10px; margin-top: 15px; }
+        .social-btn { display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #ddd; border-radius: 8px; padding: 10px 15px; color: #555; text-decoration: none; font-weight: bold; font-size: 0.9rem; flex: 1; background: white; transition: 0.3s; }
+        .social-btn:hover { background: #f8f9fa; transform: scale(1.02); }
+        .divider { display: flex; align-items: center; justify-content: center; margin: 20px 0; color: #7f8c8d; font-size: 0.85rem; }
+        .divider span { flex: 1; height: 1px; background: #ddd; }
+        .divider p { margin: 0 10px; }
+
+        .alert { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; text-align: center; font-weight: bold; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2><i class="fas fa-lock"></i> Iniciar Sesión</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form action="/login" method="post">
+            <div class="input-group">
+                <label><i class="fas fa-envelope"></i> Correo Electrónico:</label>
+                <input type="email" name="email" required placeholder="tu_correo@imatep.com">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-key"></i> Contraseña:</label>
+                <input type="password" name="password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn">Entrar al Panel</button>
+        </form>
+
+        <div class="divider">
+            <span></span><p>O continúa con</p><span></span>
+        </div>
+
+      <!-- Reemplaza la sección social-container de login.html y registro.html por esta versión -->
+        <div class="social-container">
+            <a href="#" onclick="alert('🔑 Registro social: Esta funcionalidad requiere de un certificado de seguridad SSL y dominio HTTPS verificado. Estará disponible de forma nativa en tu servidor de producción.'); return false;" class="social-btn">
+                <i class="fab fa-google" style="color: #ea4335;"></i> Google
+            </a>
+            <a href="#" onclick="alert('🔑 Registro social: Esta funcionalidad requiere de un certificado de seguridad SSL y dominio HTTPS verificado. Estará disponible de forma nativa en tu servidor de producción.'); return false;" class="social-btn">
+                <i class="fab fa-apple" style="color: #000;"></i> Apple
+            </a>
+        </div>
+
+        <p class="footer-text">¿No tienes una cuenta? <a href="/registro">Regístrate gratis</a></p>
+    </div>
+</body>
+</html>

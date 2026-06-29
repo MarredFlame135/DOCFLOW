@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DocFlow Pro{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --accent-blue: #3498db;
+            --accent-purple: #9b59b6;
+            --accent-green: #27ae60;
+            --bg-light: #f8f9fa;
+            --text-dark: #2d3436;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR (BARRA LATERAL) */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            box-sizing: border-box;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .sidebar .brand {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar .user-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+
+        .sidebar .user-card .username {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sidebar .user-card .badge {
+            background: var(--accent);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .sidebar .user-card .badge.pro {
+            background: var(--accent-green);
+        }
+
+        .sidebar .menu-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+        }
+
+        .sidebar .menu-links a {
+            color: #b2bec3;
+            text-decoration: none;
+            padding: 12px 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            transition: 0.2s ease;
+        }
+
+        .sidebar .menu-links a:hover, .sidebar .menu-links a.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .logout-link {
+            color: #ff7675;
+            text-decoration: none;
+            padding: 12px 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            transition: 0.2s ease;
+            margin-top: auto;
+        }
+
+        .sidebar .logout-link:hover {
+            background: rgba(231, 76, 60, 0.1);
+            color: #ff4757;
+        }
+
+        /* SECCIÓN PRINCIPAL */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .alert-container {
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; }
+            .main-content { margin-left: 0; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <a href="/" class="brand"><i class="fas fa-bolt"></i> DocFlow Pro</a>
+
+        {% if current_user.is_authenticated %}
+            <div class="user-card">
+                <span class="username" title="{{ current_user.username }}">👤 {{ current_user.username }}</span>
+                Plan: 
+                {% if current_user.subscription_tier == 'free' %}
+                    <span class="badge">Gratis</span>
+                {% else %}
+                    <span class="badge pro">{{ current_user.subscription_tier }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="menu-links">
+                <a href="/" class="{% if request.path == '/' %}active{% endif %}"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="/extraer_ui" class="{% if request.path == '/extraer_ui' %}active{% endif %}"><i class="fas fa-file-pdf"></i> 1. Extractor</a>
+                <a href="/comparar_ui" class="{% if request.path == '/comparar_ui' %}active{% endif %}"><i class="fas fa-sync-alt"></i> 2. Complementador</a>
+                <a href="/listar_ui" class="{% if request.path == '/listar_ui' %}active{% endif %}"><i class="fas fa-list-ol"></i> 3. Inventor</a>
+                <a href="/planes_ui" class="{% if request.path == '/planes_ui' %}active{% endif %}"><i class="fas fa-tags"></i> Planes de Precios</a>
+                <a href="/planes_ui" class="{% if request.path == '/planes_ui' %}active{% endif %}"><i class="fas fa-tags"></i> Planes de Precios</a>
+                
+                <!-- ENLACE DE ADMINISTRADOR EXCLUSIVO -->
+                {% if current_user.email == 'admin@docuflow.com' %}
+                    <a href="/admin/promover" class="{% if request.path == '/admin/promover' %}active{% endif %}" style="color: #f1c40f;"><i class="fas fa-user-shield"></i> Panel Admin</a>
+                {% endif %}              
+            
+            </div>
+
+            <a href="/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        {% else %}
+            <div class="user-card" style="text-align: center;">
+                <span>Acceso Limitado</span>
+            </div>
+            <div class="menu-links">
+                <a href="/login"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
+                <a href="/registro"><i class="fas fa-user-plus"></i> Registrarse</a>
+                <a href="/planes_ui"><i class="fas fa-tags"></i> Ver Planes</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="alert-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }}">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>
